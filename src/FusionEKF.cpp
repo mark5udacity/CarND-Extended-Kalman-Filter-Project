@@ -65,8 +65,8 @@ FusionEKF::FusionEKF() {
           0, 0, 0, 1;
 
   //set the acceleration noise components
-  noise_ax = 5;
-  noise_ay = 5;
+  noise_ax = 9;
+  noise_ay = 9;
 
 }
 
@@ -106,6 +106,8 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
       ekf_.x_ << measurement_pack.raw_measurements_[0], measurement_pack.raw_measurements_[1], 0, 0;
       previous_timestamp_ = measurement_pack.timestamp_;
+    } else {
+        cout << "Received unknown update type!? : " <<  measurement_pack.sensor_type_ << "\n";a
     }
 
     // done initializing, no need to predict or update
@@ -120,7 +122,6 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   /**
      * Update the state transition matrix F according to the new elapsed time.
       - Time is measured in seconds.
-   TODO:
       * Update the process noise covariance matrix.
      * Use noise_ax = 9 and noise_ay = 9 for your Q matrix.
    */
@@ -158,9 +159,10 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
   if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
     // Radar updates
-  } else {
-    // Laser updates
+  } else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
     ekf_.Update(measurement_pack.raw_measurements_);
+  } else {
+    cout << "Received unknown update type!? : " <<  measurement_pack.sensor_type_ << "\n";a
   }
 
   // print the output
