@@ -1,5 +1,8 @@
 #ifndef TOOLS_H_
 #define TOOLS_H_
+
+static const double SIGMA_FOR_DIVISION = 0.0001;
+
 #include <vector>
 #include "Eigen/Dense"
 
