@@ -77,3 +77,20 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   MatrixXd I = MatrixXd::Identity(x_size, x_size);
   P_ = (I - K * H_) * P_;
 }
+
+void KalmanFilter::PreparePrediction(float dt, float noise_ax, float noise_ay) {
+  float dt_2 = dt * dt;
+  float dt_3 = dt_2 * dt;
+  float dt_4 = dt_3 * dt;
+
+  //Modify the F matrix so that the time is integrated
+  F_(0, 2) = dt;
+  F_(1, 3) = dt;
+
+  //set the process covariance matrix Q
+  Q_ = MatrixXd(4, 4);
+  Q_ <<  dt_4/4*noise_ax, 0, dt_3/2*noise_ax, 0,
+          0, dt_4/4*noise_ay, 0, dt_3/2*noise_ay,
+          dt_3/2*noise_ax, 0, dt_2*noise_ax, 0,
+          0, dt_3/2*noise_ay, 0, dt_2*noise_ay;
+}
