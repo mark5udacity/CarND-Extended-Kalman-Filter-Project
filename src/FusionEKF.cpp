@@ -26,6 +26,9 @@ FusionEKF::FusionEKF() {
   R_laser_ << 0.0225, 0,
         0, 0.0225;
 
+  H_laser_ << 1, 0, 0, 0,
+                0, 1, 0, 0;
+
   //measurement covariance matrix - radar
   R_radar_ << 0.09, 0, 0,
         0, 0.0009, 0,
@@ -46,17 +49,6 @@ FusionEKF::FusionEKF() {
           0, 0, 1000, 0,
           0, 0, 0, 1000;
 
-
-  //measurement covariance
-  ekf_.R_ = MatrixXd(2, 2);
-  ekf_.R_ << 0.0225, 0,
-          0, 0.0225;
-
-  //measurement matrix
-  ekf_.H_ = MatrixXd(2, 4);
-  ekf_.H_ << 1, 0, 0, 0,
-          0, 1, 0, 0;
-
   //the initial transition matrix F_
   ekf_.F_ = MatrixXd(4, 4);
   ekf_.F_ << 1, 0, 1, 0,
@@ -67,7 +59,6 @@ FusionEKF::FusionEKF() {
   //set the acceleration noise components
   noise_ax = 9;
   noise_ay = 9;
-
 }
 
 /**
@@ -94,6 +85,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
 
     if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
+      cout << "Let's just hope laser comes in first?" << "\n";
       /**
       Convert radar from polar to cartesian coordinates and initialize state.
       */
@@ -146,8 +138,12 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
    */
 
   if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
+    Hj_ = tools.CalculateJacobian(ekf_.x_);
+    ekf_.prepareUpdate(R_radar_, Hj_);
+
     //ekf_.UpdateEKF(measurement_pack.raw_measurements_);
   } else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
+    ekf_.prepareUpdate(R_laser_, H_laser_);
     ekf_.Update(measurement_pack.raw_measurements_);
   } else {
     cout << "Received unknown update type!? : " <<  measurement_pack.sensor_type_ << "\n";

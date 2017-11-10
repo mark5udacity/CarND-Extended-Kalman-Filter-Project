@@ -68,6 +68,8 @@ public:
   void UpdateEKF(const Eigen::VectorXd &z);
 
   void PreparePrediction(float time, float noise_ax, float noise_ay);
+
+    void prepareUpdate(MatrixXd matrix, MatrixXd matrix1);
 };
 
 #endif /* KALMAN_FILTER_H_ */

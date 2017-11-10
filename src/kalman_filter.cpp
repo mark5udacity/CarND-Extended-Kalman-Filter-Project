@@ -4,6 +4,7 @@ using Eigen::MatrixXd;
 using Eigen::VectorXd;
 
 #include <iostream>
+#include <math.h>
 
 // Please note that the Eigen library does not initialize
 // VectorXd or MatrixXd objects with zeros upon creation.
@@ -55,16 +56,25 @@ void KalmanFilter::Update(const VectorXd &z) {
 
 void KalmanFilter::UpdateEKF(const VectorXd &z) {
   /**
-  TODO:
     * update the state by using Extended Kalman Filter equations
   */
 
   std::cout << "z: " << z << "\n";
   std::cout << "x: " << x_ << "\n";
 
-  MatrixXd jacobian = tools.CalculateJacobian(x_);
+  double px, py, vx, vy;
+  px = x_[0];
+  py = x_[1];
+  vx = x_[2];
+  vy = x_[3];
+  double rho = sqrt(px*px + py*py); // pythagorean theorem
+  double phi = atan2(py, px);
+  double range_rate = (px*vx + py*vy) / rho;
 
-  MatrixXd y = z - jacobian;
+
+  VectorXd prediction(3);
+
+  MatrixXd y = z - prediction;
   MatrixXd Ht = H_.transpose();
   MatrixXd S = H_ * P_ * Ht + R_;
   MatrixXd Si = S.inverse();
@@ -93,4 +103,9 @@ void KalmanFilter::PreparePrediction(float dt, float noise_ax, float noise_ay) {
           0, dt_4/4*noise_ay, 0, dt_3/2*noise_ay,
           dt_3/2*noise_ax, 0, dt_2*noise_ax, 0,
           0, dt_3/2*noise_ay, 0, dt_2*noise_ay;
+}
+
+void KalmanFilter::prepareUpdate(MatrixXd measurement_R, MatrixXd measurement_H) {
+    R_ = measurement_R;
+    H_ = measurement_H;
 }
