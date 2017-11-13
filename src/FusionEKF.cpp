@@ -85,7 +85,6 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
 
     if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
-      cout << "Let's just hope laser comes in first?" << "\n";
       /**
       Convert radar from polar to cartesian coordinates and initialize state.
       */
@@ -100,18 +99,15 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
       vy = 0;
 
       ekf_.x_ << py, px, vx, vy;
-      is_initialized_ = true;
     }
     else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
-      /**
-      Initialize state.
-      */
-
       ekf_.x_ << measurement_pack.raw_measurements_[0], measurement_pack.raw_measurements_[1], 0, 0;
       previous_timestamp_ = measurement_pack.timestamp_;
     } else {
         cout << "Received unknown update type!? : " <<  measurement_pack.sensor_type_ << "\n";
     }
+
+    is_initialized_ = true;
 
     // done initializing, no need to predict or update
     return;
